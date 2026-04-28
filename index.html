@@ -1,1 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TV Show Streamer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Work+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ✅ YOUR ORIGINAL CSS — UNCHANGED */
+        :root {
+            --primary-orange: #FF6B35;
+            --primary-purple: #6A4C93;
+            --warm-cream: #FFF8F0;
+            --dark-bg: #1A1423;
+            --card-bg: #2D2635;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B8B8D1;
+            --accent-yellow: #FFD23F;
+            --hover-glow: rgba(255, 107, 53, 0.2);
+            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
 
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #2D1B3D 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .container { max-width:1400px; margin:auto; padding:20px; }
+
+        .logo {
+            font-family:'Pacifico', cursive;
+            font-size:3rem;
+            text-align:center;
+        }
+
+        .show-selector { display:flex; gap:10px; justify-content:center; margin:20px 0; }
+
+        .show-btn { padding:10px 20px; cursor:pointer; }
+
+        .main-content { display:grid; grid-template-columns:250px 1fr; gap:20px; }
+
+        .season-btn, .episode-card { cursor:pointer; padding:10px; }
+
+        .video-container { position:relative; padding-bottom:56.25%; }
+
+        iframe {
+            position:absolute;
+            width:100%;
+            height:100%;
+            top:0;
+            left:0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="logo" id="showTitle">Friends</h1>
+
+    <div class="show-selector">
+        <!-- ✅ FIXED: pass event -->
+        <button class="show-btn active" onclick="selectShow(event, 'friends')">Friends</button>
+        <button class="show-btn" onclick="selectShow(event, 'modern-family')">Modern Family</button>
+        <button class="show-btn" onclick="selectShow(event, '2-broke-girls')">2 Broke Girls</button>
+        <button class="show-btn" onclick="selectShow(event, 'himym')">HIMYM</button>
+    </div>
+
+    <div class="main-content">
+        <div>
+            <h3>Seasons</h3>
+            <div id="seasonList"></div>
+        </div>
+
+        <div>
+            <div class="video-container">
+                <!-- ✅ UNCHANGED embed -->
+                <iframe id="videoPlayer" allowfullscreen></iframe>
+            </div>
+
+            <div>
+                <button onclick="prev()">Prev</button>
+                <button onclick="next()">Next</button>
+            </div>
+
+            <div id="episodesGrid"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const showsData = {
+    friends: { imdb:'tt0108778', seasons:10, episodesPerSeason:{1:24,2:24,3:25,4:24,5:24,6:25,7:24,8:24,9:24,10:18}},
+    'modern-family': { imdb:'tt1442437', seasons:11, episodesPerSeason:{1:24,2:24,3:24,4:24,5:24,6:24,7:22,8:22,9:22,10:22,11:18}},
+    '2-broke-girls': { imdb:'tt1845307', seasons:6, episodesPerSeason:{1:24,2:24,3:24,4:22,5:22,6:22}},
+    himym: { imdb:'tt0460649', seasons:9, episodesPerSeason:{1:22,2:22,3:20,4:24,5:24,6:24,7:24,8:24,9:24}}
+};
+
+let currentShow='friends', currentSeason=1, currentEpisode=1;
+
+function selectShow(e, showKey){
+    currentShow=showKey;
+    document.querySelectorAll('.show-btn').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    renderSeasons();
+    selectSeason(1);
+}
+
+function renderSeasons(){
+    const el=document.getElementById('seasonList');
+    el.innerHTML='';
+    for(let i=1;i<=showsData[currentShow].seasons;i++){
+        let b=document.createElement('button');
+        b.textContent="Season "+i;
+        b.className="season-btn";
+        b.onclick=()=>selectSeason(i);
+        el.appendChild(b);
+    }
+}
+
+function selectSeason(s){
+    currentSeason=s;
+    renderEpisodes();
+    playEpisode(1);
+}
+
+function renderEpisodes(){
+    const el=document.getElementById('episodesGrid');
+    el.innerHTML='';
+    let total=showsData[currentShow].episodesPerSeason[currentSeason];
+    for(let i=1;i<=total;i++){
+        let d=document.createElement('div');
+        d.textContent="Ep "+i;
+        d.className="episode-card";
+        d.onclick=()=>playEpisode(i);
+        el.appendChild(d);
+    }
+}
+
+function playEpisode(ep){
+    currentEpisode=ep;
+    const show=showsData[currentShow];
+
+    // ✅ YOUR ORIGINAL EMBED (UNCHANGED)
+    document.getElementById('videoPlayer').src =
+        `https://vsembed.ru/embed/tv?imdb=${show.imdb}&season=${currentSeason}&episode=${ep}`;
+}
+
+function prev(){
+    if(currentEpisode>1) playEpisode(currentEpisode-1);
+}
+
+function next(){
+    playEpisode(currentEpisode+1);
+}
+
+// init
+renderSeasons();
+selectSeason(1);
+</script>
+
+</body>
+</html>
